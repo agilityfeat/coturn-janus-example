@@ -1,0 +1,33 @@
+---
+# Build usrscp
+- name: Clone usrsctp
+  ansible.builtin.git:
+    repo: https://github.com/sctplab/usrsctp
+    dest: "{{ janus_usrsctp_build_dir }}"
+    version: "{{ janus_usrsctp_version }}"
+    update: no
+
+- name: Bootstrap usrsctp
+  command:
+    cmd: ./bootstrap
+    chdir: "{{ janus_usrsctp_build_dir }}"
+  when: janus_upgrade_available
+
+- name: Configure usrsctp
+  command:
+    cmd: "./configure --prefix={{ janus_lib_prefix }} --disable-programs --disable-inet --disable-inet6"
+    chdir: "{{ janus_usrsctp_build_dir }}"
+  when: janus_upgrade_available
+
+- name: Make usrsctp
+  command:
+    cmd: make
+    chdir: "{{ janus_usrsctp_build_dir }}"
+  when: janus_upgrade_available
+
+- name: Install usrsctp
+  become: true
+  command:
+    cmd: make install
+    chdir: "{{ janus_usrsctp_build_dir }}"
+  when: janus_upgrade_available

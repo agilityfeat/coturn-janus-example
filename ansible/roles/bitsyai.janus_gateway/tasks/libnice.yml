@@ -1,0 +1,44 @@
+---
+# Build libnice 
+- name: Set python 3 as default
+  ansible.builtin.command:
+    cmd: update-alternatives --install /usr/local/bin/python python /usr/bin/python3 10
+
+- name: Install meson and ninja build systems
+  ansible.builtin.pip:
+    name:
+      - meson 
+    virtualenv: "{{ janus_workspace_dir }}/venv"
+    virtualenv_command: /usr/local/bin/python -m venv
+
+- name: Clone libnice
+  ansible.builtin.git:
+    repo: "{{ janus_libnice_repo }}"
+    dest: "{{ janus_libnice_build_dir }}"
+    version: "{{ janus_libnice_version }}"
+    update: no
+
+- name: Run libnice meson build
+  command:
+    cmd: "meson --prefix={{ janus_lib_prefix }} build"
+    chdir: "{{ janus_libnice_build_dir }}"
+  when: janus_upgrade_available
+  environment:
+    PATH: "{{ janus_workspace_dir }}/venv/bin:{{ ansible_env.PATH }}"
+
+- name: Configure libnice ninja build
+  command:
+    cmd: "ninja -C build"
+    chdir: "{{ janus_libnice_build_dir }}"
+  when: janus_upgrade_available
+  environment:
+    PATH: "{{ janus_workspace_dir }}/venv/bin:{{ ansible_env.PATH }}"
+
+- name: Install libnice
+  become: true
+  command:
+    cmd: "ninja -C build install"
+    chdir: "{{ janus_libnice_build_dir }}"
+  when: janus_upgrade_available
+  environment:
+    PATH: "{{ janus_workspace_dir }}/venv/bin:{{ ansible_env.PATH }}"

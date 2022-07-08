@@ -1,0 +1,8 @@
+---
+- hosts: janus
+  remote_user: ubuntu
+  become: yes
+  roles:
+    - bitsyai.janus_gateway
+  vars_files:
+    - ../vars/{{ env_name }}.yml

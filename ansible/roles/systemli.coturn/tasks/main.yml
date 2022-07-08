@@ -1,0 +1,132 @@
+---
+- name: Update cache
+  ansible.builtin.apt:
+    name: coturn
+    update_cache: yes
+    state: "{{ coturn_install_state }}"
+
+- name: Manage tls permissions
+  block:
+  - name: Fail if tls should be used but required values are not set
+    assert:
+      that:
+        - coturn_tls_listening_port is defined and coturn_tls_listening_port is truthy
+        - coturn_tls_cert_dir is defined and coturn_tls_cert_dir is truthy
+        - coturn_tls_cert is defined and coturn_tls_cert is truthy
+        - coturn_tls_key is defined and coturn_tls_key is truthy
+  - name: Add turnserver user to TLS group
+    user:
+      name: "{{ turn_user }}"
+      groups: "{{ coturn_tls_group }}"
+      append: true
+    when: coturn_tls_group is defined
+
+  - name: Get file info of TLS Folder
+    stat:
+      path: "{{ coturn_tls_cert_dir }}"
+    register: stat_coturn_tls_cert_dir
+
+  - name: Get info of cert post hooks folder
+    stat:
+      path: /etc/letsencrypt/renewal-hooks/post
+    register: certbot_post_hooks
+
+  - name: Get info of cert pre hooks folder
+    stat:
+      path: /etc/letsencrypt/renewal-hooks/post
+    register: certbot_pre_hooks
+
+  - name: Grant turnserver user access to certificate folder
+    acl:
+      path: "{{ coturn_tls_cert_dir }}"
+      entity: "{{ turn_user }}"
+      etype: user
+      permissions: rx
+      recursive: yes
+      state: present
+    when: stat_coturn_tls_cert_dir.stat.exists
+
+  - name: Setup certbot pre hooks
+    template:
+      src: "{{ item }}"
+      dest: "/etc/letsencrypt/renewal-hooks/pre/{{ item | basename | regex_replace('\\.j2$', '') }}.sh"
+      owner: "root"
+      group: "root"
+      mode: "0755"
+    with_fileglob:
+      - "../templates/certbot/pre/*.j2"
+    when: certbot_pre_hooks.stat.exists
+
+  - name: Setup certbot post hooks
+    template:
+      src: "{{ item }}"
+      dest: "/etc/letsencrypt/renewal-hooks/post/{{ item | basename | regex_replace('\\.j2$', '') }}.sh"
+      owner: "root"
+      group: "root"
+      mode: "0755"
+    with_fileglob:
+      - "../templates/certbot/post/*.j2"
+    when: certbot_post_hooks.stat.exists
+
+  - name: Copy Diffie-Hellmann parameter (from https://ssl-config.mozilla.org/ffdhe2048.txt)
+    copy:
+      src: dhparam.pem
+      dest: /etc/dhparam.pem
+      owner: root
+      group: root
+      mode: '0644'
+  when: coturn_use_tls
+
+- name: Create systemd override for coturn
+  block:
+    - name: Create needed folder
+      file:
+        path: /etc/systemd/system/coturn.service.d/
+        state: directory
+        mode: '0755'
+    - name: Copy coturn systemd override file
+      copy:
+        src: override.conf
+        dest: /etc/systemd/system/coturn.service.d/override.conf
+        owner: root
+        group: root
+        mode: '0644'
+      notify:
+        - systemd daemon-reload
+        - restart coturn
+
+- name: Create lograte structure
+  block:
+    - name: Create needed folder
+      file:
+        path: /var/log/turnserver
+        owner: "{{ turn_user }}"
+        group: "{{ turn_user }}"
+        state: directory
+        mode: '0755'
+    - name: Copy logrotate config
+      copy:
+        src: logging.conf
+        dest: /etc/logrotate.d/coturn
+        owner: root
+        group: root
+        mode: '0644'
+
+- name: Configure coturn
+  template:
+    src: turnserver.conf.j2
+    dest: /etc/turnserver.conf
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart coturn
+
+- name: configure firewall on ubuntu
+  include: ufw.yml
+  when: ansible_os_family == 'Debian'
+  notify: restart coturn
+
+- name: configure firewall on Centos
+  include: firewalld.yml
+  when: ansible_os_family == 'RedHat'
+  notify: restart coturn

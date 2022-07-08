@@ -1,0 +1,107 @@
+---
+# defaults file for ansible-role-janus-gateway
+
+janus_build_extras:
+  audiobridge: false
+  mqtt: false
+  nanomsg: false
+  rabbitmq: false
+  recordplay: false
+  sip: false
+  systemd: true
+  websockets: true
+
+janus_installed_versions:
+  janus: null
+  libnice: null
+  usrsctp: null
+  libsrtp: null
+  libwebsockets: null
+
+janus_user: janus
+janus_group: janus
+janus_workspace_dir: "{{ ansible_env.HOME }}/workspace"
+janus_install_dir: /opt/janus
+janus_conf_dir: "{{ janus_install_dir }}/etc/janus"
+janus_log_file: /var/log/janus/janus.log
+janus_lib_prefix: /usr/local
+janus_pid_file: /var/run/janus/janus.pid
+
+janus_libwebsockets_build_dir: "{{ janus_workspace_dir }}/libwebsockets"
+janus_libwebsockets_repo: https://github.com/warmcat/libwebsockets.git
+janus_libwebsockets_version: v4.1.2
+
+janus_libnice_build_dir:  "{{ janus_workspace_dir }}/libnice"
+janus_libnice_repo: https://github.com/libnice/libnice
+janus_libnice_version: "0.1.18"
+
+janus_usrsctp_build_dir: "{{ janus_workspace_dir }}/usrsctp"
+janus_usrsctp_repo: https://github.com/sctplab/usrsctp
+janus_usrsctp_version: 1d204411493d4a5b9ec66fa9aed958320d7fb2c9
+
+janus_libsrtp_version: "2.4.2"
+janus_libsrtp_tarball: "https://github.com/cisco/libsrtp/archive/v{{ janus_libsrtp_version }}.tar.gz"
+janus_libsrtp_build_dir: "{{ janus_workspace_dir }}/libsrtp-{{ janus_libsrtp_version }}"
+
+janus_build_dir: "{{ janus_workspace_dir }}/janus-gateway"
+janus_repo: https://github.com/meetecho/janus-gateway.git
+janus_version: v1.0.2
+janus_upgrade_available: "{{ janus_installed_versions.janus == None or janus_installed_versions.janus < janus_version }}"
+
+janus_api_secret: null
+janus_token_auth_secret: null
+janus_admin_secret: null
+
+janus_conf_var:
+  janus:
+    plugins_folder: "{{ janus_install_dir }}/lib/janus/plugins"
+    transports_folder: "{{ janus_install_dir }}/lib/janus/transports"
+    events_folder: "{{ janus_install_dir }}/lib/janus/events"
+    loggers_folder: "{{ janus_install_dir }}/lib/janus/loggers"
+    log_to_stdout: true
+    debug_level: 4
+    daemonize: false
+    pid_file: "/var/run/janus.pid"
+    api_secret: "{{ janus_api_secret }}"
+    token_auth: true
+    token_auth_secret: "{{ janus_token_auth_secret }}"
+    admin_secret: "{{ janus_admin_secret }}"
+    server_name: "{{ inventory_hostname }}"
+    session_timeout: 60
+    candidates_timeout: 45
+    reclaim_session_timeout: 0
+    no_webrtc_encryption: false
+    ignore_unreachable_ice_server: true
+    enable_nat: false
+    stun_server_fqdn: stun.voup.eutelia.it
+    stun_server_port: 3478
+    stun_server_full_trickle: false
+  janus.transport.http:
+    admin_base_path: "/admin"
+    admin_http_port: 7088
+    admin_https_port: 7889
+    admin_http: true
+    admin_https: false
+    base_path: "/janus"
+    https: false
+    https_port: 8089
+    http: true
+    http_port: 8088
+
+janus_conf_template:
+  janus.eventhandler.gelfevh.jcfg: janus.eventhandler.gelfevh.jcfg
+  janus.eventhandler.sampleevh.jcfg: janus.eventhandler.sampleevh.jcfg
+  janus.eventhandler.wsevh.jcfg: janus.eventhandler.wsevh.jcfg
+  janus.jcfg: janus.jcfg
+  janus.plugin.audiobridge.jcfg: janus.plugin.audiobridge.jcfg
+  janus.plugin.echotest.jcfg: janus.plugin.echotest.jcfg
+  janus.plugin.nosip.jcfg: janus.plugin.nosip.jcfg
+  janus.plugin.recordplay.jcfg: janus.plugin.recordplay.jcfg
+  janus.plugin.sip.jcfg: janus.plugin.sip.jcfg
+  janus.plugin.streaming.jcfg: janus.plugin.streaming.jcfg
+  janus.plugin.textroom.jcfg: janus.plugin.textroom.jcfg
+  janus.plugin.videocall.jcfg: janus.plugin.videocall.jcfg
+  janus.plugin.voicemail.jcfg: janus.plugin.voicemail.jcfg
+  janus.transport.http.jcfg: janus.transport.http.jcfg
+  janus.transport.pfunix.jcfg: janus.transport.pfunix.jcfg
+  janus.transport.websockets.jcfg: janus.transport.websockets.jcfg
