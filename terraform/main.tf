@@ -28,7 +28,7 @@ data "aws_subnet" "main_public" {
 
 resource "aws_instance" "janus_dev" {
   ami                    = data.aws_ami.ubuntu.id
-  instance_type          = "t3.medium"
+  instance_type          = "t3.micro"
   subnet_id              = data.aws_subnet.main_public.id
   key_name               = var.main_ssh_keyname
   vpc_security_group_ids = [aws_security_group.janus_dev.id]
@@ -42,7 +42,7 @@ resource "aws_instance" "janus_dev" {
 
 resource "aws_instance" "coturn_dev" {
   ami                    = data.aws_ami.ubuntu.id
-  instance_type          = "t3.medium"
+  instance_type          = "t3.micro"
   subnet_id              = data.aws_subnet.main_public.id
   key_name               = var.main_ssh_keyname
   vpc_security_group_ids = [aws_security_group.coturn_dev.id]
