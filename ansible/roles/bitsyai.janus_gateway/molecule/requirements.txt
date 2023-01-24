@@ -4,9 +4,9 @@
 #
 #    pip-compile
 #
-ansible==4.3.0
+ansible==7.0.0
     # via molecule
-ansible-core==2.11.3
+ansible-core==2.14.1
     # via ansible
 ansible-lint==5.1.2
     # via
@@ -14,7 +14,7 @@ ansible-lint==5.1.2
     #   molecule
 arrow==1.1.1
     # via jinja2-time
-backports.entry-points-selectable==1.1.0
+backports-entry-points-selectable==1.1.0
     # via virtualenv
 bcrypt==3.2.0
     # via paramiko
@@ -145,10 +145,8 @@ rich==10.6.0
     #   ansible-lint
     #   enrich
     #   molecule
-ruamel.yaml==0.17.10
+ruamel-yaml==0.17.10
     # via ansible-lint
-ruamel.yaml.clib==0.2.6
-    # via ruamel.yaml
 selinux==0.2.1
     # via
     #   molecule
