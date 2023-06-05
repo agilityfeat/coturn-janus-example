@@ -14,7 +14,7 @@ general: {
 
 	log_to_stdout = "{{ janus_conf_var['janus']['log_to_stdout'] }}"					# Whether the Janus output should be written
 											# to stdout or not (default=true)
-	log_to_file = "{{ janus_log_file }}		# Whether to use a log file or not
+	log_to_file = "{{ janus_log_file }}"		# Whether to use a log file or not
 	debug_level = "{{ janus_conf_var['janus']['debug_level'] }}"							# Debug/logging level, valid values are 0-7
 	#debug_timestamps = true				# Whether to show a timestamp for each log line
 	#debug_colors = false					# Whether colors should be disabled in the log
@@ -33,7 +33,7 @@ general: {
 	# started, and to destroy at shutdown
 
 		# There are different ways you can authenticate the Janus and Admin APIs
-	api_secret = "{{ janus_conf_var['janus']['api_secret'] }}"
+	#api_secret = "{{ janus_conf_var['janus']['api_secret'] }}"
                                     # String that all Janus requests must contain
 									# to be accepted/authorized by the Janus core.
 									# Useful if you're wrapping all Janus API requests
@@ -41,13 +41,13 @@ general: {
 									# where you do the things your way) and you
 									# don't want other application to mess with
 									# this Janus instance.
-	token_auth = "{{ janus_conf_var['janus']['token_auth'] }}"				
+	#token_auth = "{{ janus_conf_var['janus']['token_auth'] }}"				
                                     # Enable a token based authentication
 									# mechanism to force users to always provide
 									# a valid token in all requests. Useful if
 									# you want to authenticate requests from web
 									# users.
-	token_auth_secret = "{{ janus_conf_var['janus']['token_auth_secret'] }}"		
+	#token_auth_secret = "{{ janus_conf_var['janus']['token_auth_secret'] }}"		
                                     # Use HMAC-SHA1 signed tokens (with token_auth). Note that
 									# without this, the Admin API MUST
 									# be enabled, as tokens are added and removed
@@ -267,7 +267,7 @@ media: {
 # be used for gathering candidates, and enable or disable the
 # internal libnice debugging, if needed.
 nat: {
-{% if "{{ janus_conf_var['janus']['enable_nat'] }}" == true %}
+{% if janus_conf_var['janus']['enable_nat'] == true %}
      stun_server = "{{ janus_conf_var['janus']['stun_server_fqdn'] }}"
      stun_port = {{ janus_conf_var['janus']['stun_server_port'] }}
      nice_debug = false
@@ -307,7 +307,7 @@ nat: {
 	# Multiple public IP addresses can be specified as a comma separated list
 	# if the Janus is deployed in a DMZ between two 1-1 NAT for internal and
 	# external users.
-	#nat_1_1_mapping = "1.2.3.4"
+	nat_1_1_mapping = "{{ janus_conf_var['janus']['server_name'] }}"
 	#keep_private_host = true
 
 	# You can configure a TURN server in two different ways: specifying a

@@ -1,7 +1,9 @@
 ---
 # coturn current vars
-coturn_static_auth_secret: cw0XNmO3sgT0P0tv0ywa9ALJwNptlpvK
+coturn_static_auth_secret: turnpassword
 coturn_use_tls: false
+coturn_external_ip: "{{ inventory_hostname }}"
+coturn_domain: "mydomain.com"
 
  # Janus build config
 janus_build_extras:
