@@ -8,3 +8,5 @@
 6. Add ips to Ansible inventory on `ansible/inventory/hosts.ini`
 7. Configure Janus server using ansible: `cd ../ansible && ansible-playbook -i inventory/hosts.ini janus.yml`
 8. Configure Coturn server using janus: `ansible-playbook -i inventory/hosts.ini coturn.yml`
+
+(9). (Deploy the app in the s3)
